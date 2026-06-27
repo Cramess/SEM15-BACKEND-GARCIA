@@ -6,8 +6,21 @@ const categoriesRouter = require('./routes/categories');
 
 const app = express();
 
-// Middlewares
-app.use(cors());
+// Orígenes permitidos: localhost en desarrollo + dominio Vercel en producción
+const allowedOrigins = [
+    'http://localhost:3000',
+    process.env.FRONTEND_URL,
+].filter(Boolean); // elimina valores undefined/null
+
+app.use(cors({
+    origin: (origin, callback) => {
+        // Permitir requests sin origin (Postman, mobile, server-to-server)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes(origin)) return callback(null, true);
+        callback(new Error(`CORS: origen no permitido → ${origin}`));
+    },
+    credentials: true,
+}));
 app.use(express.json());
 
 // Rutas
